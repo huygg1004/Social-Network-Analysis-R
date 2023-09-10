@@ -1,0 +1,227 @@
+---
+title: "Social Network Analysis in R"
+author: "Huy Doan"
+date: "2023-09-10"
+output: pdf_document
+---
+---
+title: Social Network Analysis
+output: html_document
+---
+
+# Social Network Analysis
+
+## Creating a Basic Undirected Graph
+
+```{r}
+library(igraph)
+
+# Create a basic undirected graph
+g <- graph(c(1, 2, 2, 3, 3, 4, 4, 1), directed = FALSE, n = 7)
+plot(g, vertex.color = "green", vertex.size = 40, edge.color = 'red')
+
+```
+
+#3 Direction of Relationships
+
+```{r}
+# Create a directed graph to represent relationships
+g1 <- graph(c("Amy", "Ram", "Ram", "Li", "Li", "Amy", "Amy", "Li", "Kate", "Li"), directed = TRUE)
+plot(g1, vertex.color = "green", vertex.size = 40, edge.color = "red")
+
+```
+
+
+#Network Measures
+```{r}
+# Calculate degrees
+degree(g1, mode = 'all')  # Number of all in and out degrees
+degree(g1, mode = 'in')   # Number of "in" degrees
+degree(g1, mode = 'out')  # Number of "out" degrees
+
+# Calculate network measures
+diameter(g1, directed = FALSE, weights = NA)
+edge_density(g1, loops = FALSE)
+ecount(g1) / (vcount(g1) * (vcount(g1) - 1))
+reciprocity(g1)
+closeness(g1, mode = 'all', weights = NA)
+betweenness(g1, directed = TRUE, weights = NA)
+edge_betweenness(g1, directed = TRUE, weights = NA)
+```
+# Read Data File
+```{r}
+
+# Define the file path
+file_path <- "C:/Users/Admin/Desktop/networkdata.csv"
+
+# Read the CSV file into a data frame
+data <- read.csv(file_path)
+y <- data.frame(data$first, data$second)
+
+
+```
+
+#Create a Network
+```{r}
+# Create a directed graph 'net' from a data frame 'y'
+net <- graph.data.frame(y, directed = TRUE)
+
+# Get the vertices (nodes) of the graph 'net' and store them in a variable
+vertices <- V(net)
+
+# Get the edges of the graph 'net' and store them in a variable
+edges <- E(net)
+
+# Set the labels of vertices in 'net' to match their 'name' attribute
+V(net)$label <- V(net)$name
+
+# Calculate and store the degree (number of incident edges) of each vertex in 'net'
+V(net)$degree <- degree(net)
+
+plot(net)
+
+```
+#Histogram of Node Degree
+
+```{R}
+
+# Create a histogram of node degree
+hist(V(net)$degree, col = 'green', main = 'Histogram of Node Degree', ylab = 'Frequency', xlab = 'Degree of Vertices')
+
+```
+#Network Diagram
+```{R}
+
+# Plot the network graph with specified visual attributes
+set.seed(222)
+plot(
+  net,
+  vertex.color = 'green',
+  edge.arrow.size = 0.1,
+  vertex.label.cex = 0.8
+)
+
+# Highlighting degrees & layouts:
+plot(
+  net,
+  vertex.color = rainbow(52),
+  vertex.size = V(net)$degree * 0.4,
+  edge.arrow.size = 0.1,
+  layout = layout.fruchterman.reingold
+)
+
+plot(
+  net,
+  vertex.color = rainbow(52),
+  vertex.size = V(net)$degree * 0.4,
+  edge.arrow.size = 0.1,
+  layout = layout.graphopt
+)
+
+plot(
+  net,
+  vertex.color = rainbow(52),
+  vertex.size = V(net)$degree * 0.4,
+  edge.arrow.size = 0.1,
+  layout = layout.kamada.kawai
+)
+
+
+```
+#Hubs And Authorities:
+#Authority:
+Authority scores represent the importance or authority of nodes in the network.
+High authority scores indicate that a node is considered authoritative or trusted in the network.
+Nodes with high authority scores tend to be connected to by other nodes in the network, which gives them credibility.
+In the provided results, the authority scores for each node are listed. For example, the node with label "CA" has an authority score of 1.0, indicating that it is highly authoritative in the network.
+
+
+#Hubs:
+Hub scores represent the importance of nodes in directing or pointing to other nodes in the network.
+High hub scores indicate that a node is an important hub, meaning it points to other authoritative nodes.
+Nodes with high hub scores tend to connect to highly authoritative nodes, serving as intermediaries.
+In the provided results, the hub scores for each node are listed. For example, the node with label "CC" has a hub score of 1.0, indicating that it is a significant hub in the network.
+
+
+```{r}
+# Calculate hub scores
+hs <- hub_score(net)$vector
+
+# Calculate authority scores
+as <- authority_score(net)$vector
+
+
+par(mfrow=c(1,2))
+set.seed(123)
+plot(net, vertex.size=hs*30, main='Hubs', vertex.color = rainbow(52), edge.arrow.size=0.1, layout=layout.kamada.kawai)
+#CE maximum outgoing links -- CB 2nd biggest -- on the outskirt not many outgoing links
+
+set.seed(123)
+plot(net, vertex.size=as*30, main='Authorities', vertex.color = rainbow(52), edge.arrow.size=0.1, layout=layout.kamada.kawai)
+par(mfrow=c(1,1))
+hs
+as
+```
+#Community Detection:
+```{r}
+net<-graph.data.frame(y,directed = F)
+cnet<-cluster_edge_betweenness(net)
+plot(cnet, net, vertex.size = 10, vertex.label.cex = 0.8)
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
